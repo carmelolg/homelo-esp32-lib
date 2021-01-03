@@ -11,10 +11,13 @@ class Homelo {
   public:
     Homelo(const char* ssid, const char* ssidPwd, String username, String password);
     void send(String json);
-    String getRoom();
+    void init();
     String auth();
     void wifiCheck();
     void wifiConnect();
+	String getRoom();
+	String getHouse();
+	bool isAlarmEnabled();
   private:
     // wifi ssid
     const char* _ssid;
@@ -24,9 +27,12 @@ class Homelo {
     String _username;
     // shield password
     String _password;
+	// sensor room
+	String room;
+	// sensor house
+	String house;	
     // Auth JWT
     String _jwt;
-	
 	// get jwt from http result
 	String getJwt(String payload);
 };

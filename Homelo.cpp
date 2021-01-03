@@ -1,5 +1,7 @@
 #include "Homelo.h"
 
+static String BASE_URL = "https://homelo-api-gateway.herokuapp.com/";
+
 Homelo::Homelo(const char* ssid, const char* ssidPwd, String username, String password){
   _ssid = ssid;
   _ssidPwd = ssidPwd;
@@ -9,13 +11,13 @@ Homelo::Homelo(const char* ssid, const char* ssidPwd, String username, String pa
 
 void Homelo::send(String json){
 	HTTPClient http;
-	String url = "https://homelo-iot-receiver.herokuapp.com/detection";
+	String url = BASE_URL + "detection";
 	http.begin(url.c_str());
 	  
 	http.addHeader("Content-Type", "application/json");
 	http.addHeader("Authorization", "Bearer " + _jwt);
 
-	Serial.println(json);
+	Serial.println("Sending data: " + json);
 	int httpResponseCode = http.POST(json);
 	if (httpResponseCode < 400) {
 		Serial.println("Data sent.");
@@ -28,9 +30,9 @@ void Homelo::send(String json){
 	http.end();
 }
 
-String Homelo::getRoom() {
+void Homelo::init() {
 	HTTPClient http;
-	String url = "https://homelo-iot-receiver.herokuapp.com/sensor?name=" + _username;
+	String url = BASE_URL + "sensor?name=" + _username;
 	http.begin(url.c_str());
 
 	http.addHeader("Authorization", "Bearer " + _jwt);
@@ -41,22 +43,51 @@ String Homelo::getRoom() {
 
 		StaticJsonDocument<500> doc;
 		deserializeJson(doc, payload);
-
-		Serial.println(payload);
     
 		const char* _room = doc[0]["room"];
-		Serial.print("I'm in the room: ");
-		Serial.println(_room);
+		const char* _house = doc[0]["house"];
 		
-		return _room;
+		room = _room;
+		house = _house;
+		
 	} else {
 		Serial.println("Sensor data are not available");
 	}
 }
 
+bool Homelo::isAlarmEnabled() {
+	HTTPClient http;
+	String url = BASE_URL + "alarm?house=" + house;
+	http.begin(url.c_str());
+
+	http.addHeader("Authorization", "Bearer " + _jwt);
+	int httpResponseCode = http.GET();
+
+	if (httpResponseCode < 400) {
+		String payload = http.getString();
+
+		if(payload == "true") {
+			return true;
+		}else {
+			return false;
+		}
+		
+	} else {
+		Serial.println("Alarm enabled retrieve error");
+	}
+}
+
+String Homelo::getRoom() {
+	return room;
+}
+
+String Homelo::getHouse() {
+	return house;
+}
+
 String Homelo::auth() {
 	HTTPClient http;
-	String url = "https://homelo-iot-receiver.herokuapp.com/auth?username=" + _username + "&password=" + _password;
+	String url = BASE_URL + "auth?username=" + _username + "&password=" + _password;
 	http.begin(url.c_str());	
 	http.addHeader("Content-Type", "application/json");
 	
