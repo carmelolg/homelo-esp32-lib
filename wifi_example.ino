@@ -2,8 +2,8 @@
 
 static const String USER          = "esp32-test";
 static const String PASSWORD      = "esp32-test";
-static const char* SSID_WIFI      = "Vodafone-58160126";
-static const char* SSID_PASSWORD  = "udkdjh2h92kaj5m";
+static const char* SSID_WIFI      = "Wifi-Test";
+static const char* SSID_PASSWORD  = "abcde";
 String ROOM                       = "";
 String HOUSE                      = "";
 
